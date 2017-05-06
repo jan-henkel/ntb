@@ -205,7 +205,7 @@ class ComputationGraph:
     def save(self):
         return [n.save_attributes() for n in self.mutable_nodes]
 
-    #load from a dict
+    #load from a list
     def load(self,l):
         for n,a in zip(self.mutable_nodes,l):
             n.load_attributes(a)
