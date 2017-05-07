@@ -6,9 +6,12 @@ def normal_init(mean=0.,std=1.,shape=()):
     return _init
 
 def xavier_init(shape):
-    fan_in = shape[0] if len(shape) == 2 else np.prod(shape[1:])
-    fan_out = shape[1] if len(shape) == 2 else shape[0]
-    std=np.sqrt(2. / (fan_in+fan_out))
+    if shape == ():
+        std=.1
+    else:
+        fan_in = shape[0] if len(shape) == 2 else np.prod(shape[1:])
+        fan_out = shape[1] if len(shape) == 2 else shape[0]
+        std=np.sqrt(2. / (fan_in+fan_out))
     def _init():
         return np.clip(np.random.normal(0.,std,shape),-4*std,+4*std)
     return _init
