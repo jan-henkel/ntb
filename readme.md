@@ -7,6 +7,35 @@ This projects aim is to provide a relatively concise and readable implementation
 
 The core backpropagation algorithm is implemented in ntb/graph.py, the various building blocks in ntb/nodes/*.py
 
+## Examples
+
+Here are a couple of small instructive examples:
+
+* [Linear fit demo](linear_fit_demo.ipynb)  
+  Fit a linear function to some artificial data
+
+* [Minimal MNIST demo](mnist_minimal_demo.ipynb)  
+  Classify MNIST images using a neural network with 1 hidden layer  
+  (MNIST files have to be present in ./ntb/datasets to run this)
+
+---
+
+To see some more involved examples run the following notebooks:
+
+* [MNIST convnet demo](mnist_convnet_demo.ipynb)  
+  Classify MNIST images using a convolutional neural network  
+  (MNIST files have to be present in ./ntb/datasets to run this)
+
+* [CIFAR10 convnet demo](cifar10_convnet_demo.ipynb)  
+  Classify CIFAR-10 images using a convolutional neural network  
+  (CIFAR-10 files have to be present in ./ntb/datasets to run this)
+
+* [RNN demo](textdata_demo.ipynb)  
+  Train a character level RNN on an input text and generate samples (akin to Andrej Karpathy's char-rnn)
+
+* [RNN in tensorflow](textdata_demo_tf.ipynb)  
+  Pretty much the same but implemented in tensorflow rather than ntb
+
 ## Usage
 
 The general procedure is to add nodes to a computational graph and run the ones of interest (during training usually the loss node, optimization node and some performance metrics like accuracy). Nodes represent input placeholders, learnable variables and all sorts of transformations.
@@ -37,14 +66,3 @@ result_z,result_w = g.run([z,w],assign_dict={x:2.0})
 ```
 
 If you've come into contact with tensorflow this should look familiar.
-
-Here are a couple of small instructive examples:
-<a href="linear_fit_demo.ipynb">Linear fit demo</a> Fit a linear function to some artificial data<br>
-<a href="mnist_minimal_demo.ipynb">Minimal MNIST demo</a> Classify MNIST images using a neural network with 1 hidden layer (MNIST files have to be present in ./ntb/datasets to run this)<br>
-
-To see some more involved examples run the following notebooks:
-<a href="mnist_demo.ipynb">MNIST convnet demo</a> Classify MNIST images using a convolutional neural network (MNIST files have to be present in ./ntb/datasets to run this)<br>
-<a href="cifar10_demo.ipynb">CIFAR10 demo</a> Classify CIFAR-10 images using a convolutional neural network(CIFAR-10 files have to be present in ./ntb/datasets to run this)<br>
-<a href="textdata_demo.ipynb">RNN demo</a> Train a character level RNN on an input text and generate samples (akin to Andrej Karpathy's char-rnn)<br>
-<a href="textdata_demo_tf.ipynb">RNN in tensorflow</a> Pretty much the same but implemented in tensorflow rather than ntb<br>
-
