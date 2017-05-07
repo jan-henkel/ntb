@@ -98,16 +98,26 @@ class MaxPool(Node):
     def init(self,**kwargs):
         self.pool_size = kwargs['pool_size']
         self.pad = kwargs['pad']
+        try:
+            self.stride = kwargs['stride']
+        except:
+            self.stride = self.pool_size[0]
+        if self.stride == self.pool_size[0] == self.pool_size[1]:
+            self.forw_eval = self.forw_eval_1
+            self.back_eval = self.back_eval_1
+        else:
+            self.forw_eval = self.forw_eval_2
+            self.back_eval = self.back_eval_2
 
     def infer_shape(self,sx):
         N,C,H,W=sx
         H+=self.pad[0]
         W+=self.pad[1]
-        assert H % self.pool_size[0] == 0
-        assert W % self.pool_size[1] == 0
-        return (N,C,H//self.pool_size[0],W//self.pool_size[1])
+        assert (H - self.pool_size[0]) % self.stride == 0
+        assert (W - self.pool_size[1]) % self.stride == 0
+        return (N,C,(H-self.pool_size[0])//self.stride+1,(W-self.pool_size[1])//self.stride+1)
                     
-    def forw_eval(self,x):
+    def forw_eval_1(self,x):
         N, C, H, W = x.shape
         H+=self.pad[0]
         W+=self.pad[1]
@@ -117,7 +127,7 @@ class MaxPool(Node):
         cache = (x_padded.shape, x_reshaped, out)
         return out, cache
 
-    def back_eval(self,Dout,cache,bp_mask=[True]):
+    def back_eval_1(self,Dout,cache,bp_mask=[True]):
         dx, = bp_mask
         if dx:
             shape_padded, x_reshaped, out = cache
@@ -131,4 +141,28 @@ class MaxPool(Node):
             dx_padded = dx_reshaped.reshape(shape_padded)
             dx = unpad_4d(dx_padded,self.pad)
         return dx,
-    
+
+    def forw_eval_2(self,x):
+        x_padded = pad_4d(x,self.pad)
+        N,C,H,W = x_padded.shape
+        x_split = x_padded.reshape(N*C,1,H,W)
+        _,_,H_out,W_out,shape_padded,shape_2d,shape_6d,strides_6d = im2col_aux(x_split.shape,(C,C)+self.pool_size,self.stride,(0,0))
+        x_cols = im2col(x_split,shape_2d,shape_6d,strides_6d,(0,0))
+        x_cols_argmax = np.argmax(x_cols, axis=0)
+        x_cols_max = np.max(x_cols,axis=0)
+        out = x_cols_max.reshape(N,C,H_out,W_out)
+        cache = (x_padded, x_cols, x_cols_argmax, shape_padded, shape_6d, strides_6d)
+        return out,cache
+
+    def back_eval_2(self,Dout,cache,bp_mask=[True]):
+        dx, = bp_mask
+        if dx:
+            x_padded, x_cols, x_cols_argmax, shape_padded, shape_6d, strides_6d = cache
+            N, C, H, W = x_padded.shape
+            Dout_reshaped = Dout.transpose(2, 3, 0, 1).flatten()
+            dx_cols = np.zeros_like(x_cols)
+            dx_cols[x_cols_argmax, np.arange(dx_cols.shape[1])] = Dout_reshaped
+            dx_split = col2im(dx_cols, shape_padded, shape_6d, strides_6d, (0,0))
+            dx_padded = dx_split.reshape(x_padded.shape)
+            dx = unpad_4d(dx_padded,self.pad)
+        return dx,

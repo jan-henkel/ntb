@@ -26,10 +26,12 @@ def conv_layer(x,F,HH,WW,stride=1,padding='same'):
     out = Conv2d(x,w,b,stride=stride,pad=pad)
     return out,w,b
 
-def max_pool_layer(x,HH,WW):
+def max_pool_layer(x,HH,WW,stride=None):
     N,C,H,W = x.shape
-    pad = (-H % HH,-W % WW)
-    out = MaxPool(x,pool_size=(HH,WW),pad=pad)
+    if stride is None:
+        stride = WW
+    pad = get_pad(H,W,HH,WW,stride,padding_type='minimal')
+    out = MaxPool(x,pool_size=(HH,WW),pad=pad,stride=stride)
     return out
 
 def batchnorm_layer(x,train):
