@@ -38,17 +38,19 @@ To see some more involved examples, run the following notebooks:
 
 The general procedure is to add nodes to a computational graph and run the ones of interest (during training usually the loss node, optimization node and some performance metrics like accuracy). Nodes represent input placeholders, learnable variables and all sorts of transformations.
 
-A graph object g is created by invoking
+A graph object `g` is created by invoking
 ```python
 g = ntb.ComputationGraph()
 ```
 Various nodes may be added to it, e.g.:
 ```python
 x = ntb.Placeholder(graph=g)
-y = ntb.Variable(value=5.0,graph=g).
+y = ntb.Variable(value=5.0,graph=g)
 ```
-The above code creates a placeholder node, which needs to be assigned a value, and a variable node, which can be used as a learnable parameter (or just hold a constant).
-The "graph=g" part can be skipped by running a "with" statement:
+The above code creates a placeholder node `x`, and a variable node `y`.
+Placeholders need to be assigned a value when they or anything depending on them is run by the graph.
+Variables can be used as a learnable parameter (or just hold constants if `learnable=False` is passed).
+The `graph=g` part can be skipped by running a `with` statement:
 ```python
 with ntb.default_graph(g):
      #...
@@ -58,9 +60,30 @@ Nodes may be combined in various ways to create new nodes, for instance:
 z = x+y
 w = x*y
 ```
-We can assign a value, say 2.0 to the placeholder x and run the nodes z and w as follows:
+We can assign a value, say `2.0` to the placeholder `x` and run the nodes `z` and `w` as follows:
 ```python
 result_z,result_w = g.run([z,w],assign_dict={x:2.0})
 ```
+The interesting part, namely automatic differentiation, comes into play with optimization nodes.
+Let's define another placeholder `r` of shape `(10,)` and the sum of `(r-y)**2`:
+```python
+r = ntb.Placeholder(shape=[10],graph=g)
+l = ((r-y)**2).sum()
+```
 
-If you've come into contact with tensorflow this should look familiar.
+We can minimize `l` by adding an optimization node ...
+```python
+opt = ntb.Optim(l,lr=1e-1) #learning rate 1e-1
+```
+... and running it repeatedly (with some fixed random input `rr` for the node `r`)
+```python
+rr = np.random.normal(size=10,loc=6.5,scale=.5)
+for i in range(100):
+  _, = g.run([opt],assign_dict={r:rr})
+```
+
+`y` will be adjusted to minimize `l` (you can run `g.run([l,y])` to verify this). Voila, we have implemented a needlessly elaborate way to find the mean of `rr` (or whatever is fed into `r`).
+
+For slightly more sensible applications, check the Examples section of the readme.
+
+If you've come into contact with tensorflow the syntax should look familiar to you.
