@@ -18,9 +18,7 @@ Here are a couple of small instructive examples:
   Classify MNIST images using a neural network with 1 hidden layer  
   (MNIST files have to be present in ./ntb/datasets to run this)
 
----
-
-To see some more involved examples run the following notebooks:
+To see some more involved examples, run the following notebooks:
 
 * [MNIST convnet demo](mnist_convnet_demo.ipynb)  
   Classify MNIST images using a convolutional neural network  
