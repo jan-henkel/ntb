@@ -197,25 +197,43 @@ class Placeholder(Node):
     def back_eval(self,Dout,cache=None,bp_mask=None):
         raise Exception("Backpropagating from a Placeholder Node")
 
+def sum_to_match(x,shape):
+    if shape == ():
+        return np.sum(x)
+    elif shape == x.shape:
+        return x
+    else:
+        diff = len(x.shape)-len(shape)
+        shape = (0,)*diff+shape
+        return np.sum(x,axis=[i for i in range(len(x.shape)) if shape[i]<x.shape[i]])
+
+def fix_ds(dx,dy,sx,sy,bp_mask):
+    if sx==sy:
+        return dx,dy
+    else:
+        if bp_mask[0]: dx=sum_to_match(dx,sx)
+        if bp_mask[1]: dy=sum_to_match(dy,sy)
+        return dx,dy
+    
 class Add(Node):
 
-    def forw_eval(self,*inputs):
-        return sum(inputs),len(inputs)
+    def forw_eval(self,x,y):
+        return x+y,(np.shape(x),np.shape(y))
     
     def back_eval(self,Dout,cache,bp_mask=None):
-        n=cache
-        ds=(Dout,)*n
-        return ds
+        sx,sy = cache
+        dx,dy = Dout,Dout
+        return fix_ds(dx,dy,sx,sy,bp_mask)
     
 class Sub(Node):
 
     def forw_eval(self,x,y):
-        return x-y,None
+        return x-y,(np.shape(x),np.shape(y))
     
     def back_eval(self,Dout,cache,bp_mask=[True]*2):
-        dx=Dout
-        dy=-Dout
-        return dx,dy
+        sx,sy = cache
+        dx,dy=Dout,-Dout
+        return fix_ds(dx,dy,sx,sy,bp_mask)
 
 class Mult(Node):
 
@@ -224,10 +242,11 @@ class Mult(Node):
 
     def back_eval(self,Dout,cache,bp_mask=[True]*2):
         x,y = cache
+        sx,sy = np.shape(x),np.shape(y)
         dx,dy = bp_mask
         if dx: dx=Dout*y
         if dy: dy=Dout*x
-        return dx,dy
+        return fix_ds(dx,dy,sx,sy,bp_mask)
 
 class Div(Node):
 
@@ -237,10 +256,11 @@ class Div(Node):
 
     def back_eval(self,Dout,cache,bp_mask=[True]*2):
         x,yinv = cache
+        sx,sy = np.shape(x),np.shape(yinv)
         dx,dy = bp_mask
         if dx: dx=Dout*yinv
         if dy: dy=-Dout*x*(yinv**2)
-        return dx,dy
+        return fix_ds(dx,dy,sx,sy,bp_mask)
     
 class Dot(Node):
 
