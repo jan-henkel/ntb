@@ -3,7 +3,7 @@ import copy
 from itertools import zip_longest
 from ..aux import shape_matches
 from ..graph import ComputationGraph
-from ..initializers import const_init
+from ..initializers import const_init,xavier_init
 
 class default_graph:
     def __init__(self,graph):
@@ -38,6 +38,8 @@ class Node:
             graph = getattr(default_graph,'graph',None)
         assert graph is not None, "No graph specified"
         self.shape = kwargs.get('shape')
+        if self.shape is not None:
+            self.shape = tuple(self.shape)
         self.init(**kwargs)
         graph.add_node(self,list(input_nodes))
 
@@ -152,7 +154,12 @@ class Variable(Node):
 
     def init(self,initializer=None,value=None,learnable=True,**kwargs):
         if initializer is None:
-            initializer = const_init(value)
+            if value is None:
+                if self.shape is None:
+                    self.shape = ()
+                initializer = xavier_init(self.shape)
+            else:
+                initializer = const_init(value)
         def _reset():
             self.value = initializer()
         self.reset = _reset
@@ -179,6 +186,10 @@ class Variable(Node):
         self.value = v.copy()
 
 class Placeholder(Node):
+
+    def init(self,**kwargs):
+        if self.shape is None:
+            self.shape = ()
 
     def forw_eval(self):
         raise Exception('No value assigned to Placeholder node')
