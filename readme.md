@@ -82,7 +82,7 @@ for i in range(100):
   _, = g.run([opt],assign_dict={r:rr})
 ```
 
-`y` will be adjusted to minimize `l` (you can run `g.run([l,y])` to verify this). Voila, we have implemented a needlessly elaborate way to find the mean of `rr` (or whatever is fed into `r`).
+`y` will be adjusted to minimize `l` (you can run `g.run([l,y],{r:rr})` to verify this). Voila, we have implemented a needlessly elaborate way to find the mean of `rr` (or whatever is fed into `r`).
 
 For slightly more sensible applications, check the Examples section of the readme.
 
