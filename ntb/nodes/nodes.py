@@ -34,7 +34,7 @@ class Node:
     def __init__(self,*input_nodes,graph:ComputationGraph = None,**kwargs):
         if len(input_nodes)>0:
             graph = input_nodes[0].graph
-        else:
+        elif graph is None:
             graph = getattr(default_graph,'graph',None)
         assert graph is not None, "No graph specified"
         self.shape = kwargs.get('shape')
