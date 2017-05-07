@@ -78,12 +78,18 @@ def render_predictions(X,y,y_pred,classes,samples_per_class=7,correct=False,**kw
                 pp.title(cls)
     pp.show()
 
-def render_confusion_sample(data,model,subset='val',**kwargs):
+
+    
+def render_confusion_sample(data,model=None,pred_fn=None,subset='val',**kwargs):
+    try:
+        predict = model.predict
+    except:
+        predict = pred_fn
     pp.rcParams['image.interpolation'] = kwargs.get('interpolation','nearest')
     pp.rcParams['figure.figsize'] = kwargs.get('figsize',(5.0, 5.0))
     pp.rcParams['image.cmap'] = kwargs.get('cmap','gray')
     X,y = data['X_'+subset],data['y_'+subset]
-    y_pred = model.predict(X)
+    y_pred = predict(X)
     num_classes = len(data['classes'])
     fig, axarr = pp.subplots(num_classes+1,num_classes+1)
     for a in axarr.flat:
