@@ -46,7 +46,7 @@ class Solver(object):
                 if self.metric is not None and (self.best_result is None or self.order*(self.history[self.metric][-1]-self.best_result[self.metric])>=0):
                     self.best_result = {h:self.history[h][-1] for h in self.history}
                     self.best_settings = self.model.save()
-                    print("(New best)",self.metric+':',self.best_result[self.metric])
+                    print("Improved",self.metric+':',self.best_result[self.metric])
                 if self.verbose:
                     print("(Epoch {0}/{1})".format(it//self.iterations_per_epoch,num_epochs),", ".join([a+':'+str(round(b,4)) for a,b in epoch_report]))
         if self.metric is not None:
