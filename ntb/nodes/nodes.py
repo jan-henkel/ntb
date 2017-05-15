@@ -20,15 +20,15 @@ class Node:
     """
     Classes derived from Node represent nodes in a computation graph. They implement a simple interface for forward and backpropagation.
     
-    The __init__ procedure takes as arguments the input nodes, the computation graph (which is ignored if the tuple of input nodes is not empty and required otherwise),
-    an iterable d_nodes of parameter nodes to be included for automatic differentiation. Furthermore there are arbitrary keyword arguments,
-    which are passed along to self.init(**kwargs), a procedure meant to be customized in derived classes.
+    The __init__ procedure takes as arguments the input nodes, the computation graph (which is ignored if the tuple of input nodes is not empty and required otherwise) 
+    and arbitrary keyword arguments, which are passed along to self.init(**kwargs), a procedure that is meant to be customized in derived classes.
 
     self.forw_eval takes as arguments the inputs needed for the calculation and returns an output tensor as well as a cache of intermediate results which are helpful (or necessary) for the backward pass.
     self.back_eval takes as arguments the gradient Dout (e.g. of a loss function) with respect to the node's output, the aforementioned cache and a list bp_mask of booleans, one for each input.
     It returns gradients wrt the inputs in the same order in which they are passed to forw_eval. bp_mask lets back_eval know which of these gradients are required (corresponding entry of bp_mask is True),
     the rest of them may be set to any value including None.
-    self.infer_shape calculates the shape of the output tensor given the input tensor shapes
+    self.infer_shape calculates the shape of the output tensor given the input tensor shapes. 
+    It has a default implementation based on "broadcasting" and is only required if self.shape isn't set in self.init().
     """
 
     def __init__(self,*input_nodes,graph:ComputationGraph = None,**kwargs):
@@ -435,14 +435,12 @@ class Equals(Node):
 
 class Subscript(Node):
 
-    def init(self,index): #,reduce_shape=False):
+    def init(self,index):
         self.index = index
-        #self.reduce_shape = reduce_shape
     
     def infer_shape(self,sx):
         if type(self.index) is tuple:
             assert len(sx)>=len(self.index),"Invalid slice or index"
-            #self.shape_mask = np.array([0 if type(i) is int else 1 for d,i in zip_longest(sx,self.index)])
             res = ()
             for d,i in zip_longest(sx,self.index,fillvalue=slice(None)):
                 if type(i) is slice:
@@ -457,7 +455,6 @@ class Subscript(Node):
             return res
         else:
             assert len(sx)>1
-            #self.shape_mask = np.array([0]+[1]*(len(sx)-1))
             return sx[1:]
 
     def forw_eval(self,x):
@@ -465,13 +462,6 @@ class Subscript(Node):
 
     def back_eval(self,Dout,cache,bp_mask=[True]):
         shape_x = cache
-        """
-        if self.reduce_shape:
-            reduced_shape = np.array(shape_x)*self.shape_mask+(1-self.shape_mask) #equals 1 in dimensions where an integer index was passed, same as input shape elsewhere
-            dx = np.zeros(reduced_shape)
-        else:
-            dx = np.zeros(shape_x)
-        """
         dx = np.zeros(shape_x)
         dx[self.index] = Dout
         return dx,
