@@ -204,8 +204,9 @@ def sum_to_match(x,shape):
         return x
     else:
         diff = len(x.shape)-len(shape)
-        shape = (0,)*diff+shape
-        return np.sum(x,axis=[i for i in range(len(x.shape)) if shape[i]<x.shape[i]])
+        s1 = np.sum(x,axis=tuple(range(diff)))
+        s2 = np.sum(s1,axis=tuple(i for i in range(len(shape)) if shape[i]==1 and s1.shape[i]!=1),keepdims=True)
+        return s2
 
 def fix_ds(dx,dy,sx,sy,bp_mask):
     if sx==sy:
