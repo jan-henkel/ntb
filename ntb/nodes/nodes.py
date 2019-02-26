@@ -1,7 +1,7 @@
 import numpy as np
 import copy
 from itertools import zip_longest
-from ..aux import shape_matches
+from ..misc import shape_matches
 from ..graph import ComputationGraph
 from ..initializers import const_init,xavier_init
 
