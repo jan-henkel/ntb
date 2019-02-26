@@ -1,6 +1,6 @@
 from .nodes import Node,Variable,default_graph
 from ..initializers import xavier_init,normal_init,const_init
-from ..aux import sigmoid
+from ..misc import sigmoid
 from itertools import compress
 import numpy as np
 
