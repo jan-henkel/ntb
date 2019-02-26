@@ -1,4 +1,4 @@
-from ..aux import sigmoid
+from ..misc import sigmoid
 from .nodes import Node,Function1d
 import numpy as np
 
