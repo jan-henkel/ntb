@@ -1,6 +1,6 @@
 import numpy as np
 from itertools import compress
-from .aux import shape_matches
+from .misc import shape_matches
         
 class ComputationGraph:
     """
