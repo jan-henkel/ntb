@@ -3,9 +3,9 @@ ntb, which stands for neural toy box (or neural toolbox if you prefer), is a sma
 It was initially inspired by the cs231n assignments from Stanford University (by now little remains of the original code).
 Syntax and usage is similar to Google's TensorFlow, however this project has a much smaller scope and puts less emphasis on computational efficiency.
 
-This projects aim is to provide a relatively concise and readable implementation of backpropagation in computational graphs (i.e. automatic differentiation) and some deep learning building blocks like convolutional layers, lstms, dropout layers, batch normalization etc.
+This project's aim is to provide a relatively concise and readable implementation of backpropagation in computational graphs (i.e. automatic differentiation) and some deep learning building blocks like convolutional layers, lstms, dropout layers, batch normalization etc.
 
-The core backpropagation algorithm is implemented in ntb/graph.py, the various building blocks in ntb/nodes/*.py
+The core backpropagation algorithm is implemented in ntb/graph.py. The various building blocks reside in ntb/nodes/*.py
 
 ## Examples
 
